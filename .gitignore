@@ -18,3 +18,4 @@ models/
 .DS_Store
 .pytest_cache/
 data/processed/
+*.egg-info/
