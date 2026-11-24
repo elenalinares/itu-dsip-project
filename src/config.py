@@ -60,3 +60,8 @@ MLFLOW_TRACKING_URI = f"sqlite:///{MLFLOW_STATE_DIR}/mlflow.db"
 MLFLOW_ARTIFACT_LOCATION = str(MLFLOW_STATE_DIR / "artifacts")
 EXPERIMENT_NAME = "vial_image_classification"
 MODEL_NAME = "cnn_model"
+
+# ---------------------------------------------------------------- Drift detection
+DRIFT_DEFAULT_DAYS = 7  # only look at requests from the last 7 days
+DRIFT_KS_PVALUE_THRESHOLD = 0.05  # KS test p-value below this = drift
+DRIFT_MEAN_CONFIDENCE_THRESHOLD = 0.1  # or: mean confidence moved more than this
