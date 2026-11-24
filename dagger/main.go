@@ -35,6 +35,28 @@ func (m *VialPipeline) Test(
 		Stdout(ctx)
 }
 
+// Train the model and return the artifacts directory (checkpoint, metrics, drift baseline)
+//
+// For now this executes the original training notebook, which downloads the
+// data itself. Once the training code is refactored into the package, only
+// the command below changes.
+func (m *VialPipeline) Train(
+	// Project root.
+	// +defaultPath="/"
+	// +ignore=[".git", ".venv", "**/__pycache__", "**/*.egg-info", "data/images/raw", "data/test/*.jpg", "artifacts", "mlflow-state", "models"]
+	source *dagger.Directory,
+) *dagger.Directory {
+	return m.PythonEnv(source).
+		WithExec([]string{"pip", "install", "nbconvert", "ipykernel"}).
+		WithExec([]string{
+			"jupyter", "nbconvert", "--to", "notebook", "--execute",
+			"--ExecutePreprocessor.timeout=-1",
+			"--output-dir", "/tmp", "--output", "01_training_executed.ipynb",
+			"notebooks/01_training.ipynb",
+		}).
+		Directory("/src/artifacts")
+}
+
 // Python container with the project's dependencies installed and the source mounted
 func (m *VialPipeline) PythonEnv(
 	// Project root.

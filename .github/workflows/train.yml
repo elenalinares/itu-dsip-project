@@ -1,0 +1,42 @@
+name: Train
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  train:
+    name: Train the model with Dagger
+    # Same pinned runner as ci.yml: Dagger v0.19.6 does not start on ubuntu-latest
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: dagger call train
+        uses: dagger/dagger-for-github@v7
+        with:
+          version: "0.19.6"
+          verb: call
+          args: train export --path artifacts
+
+      - name: Compare with docs/baseline.md
+        run: |
+          ls -la artifacts
+          echo "Checkpoint MD5 (baseline: fc7bae2cc82df8e5ab99e1a96bae6474):"
+          md5sum artifacts/vial_cnn_model.pth
+          python3 -c "import json; r = json.load(open('artifacts/model_results.json')); r.pop('classification_report'); print(json.dumps(r, indent=2))"
+
+      - name: Upload model artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: model-artifacts
+          path: artifacts/
+
+      - name: Show Dagger engine logs
+        if: failure()
+        run: |
+          docker ps -a
+          docker logs --tail 100 dagger-engine-v0.19.6 || true
