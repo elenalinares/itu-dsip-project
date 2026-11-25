@@ -2,7 +2,7 @@
 
 import torch
 
-from reestructured.model import SimpleCNN
+from src.modeling.model import SimpleCNN
 
 
 def test_output_shape():
